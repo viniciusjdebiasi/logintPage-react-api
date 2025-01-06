@@ -1,0 +1,37 @@
+installed:
+express;
+cors;
+mysql2;
+express-fileupload;
+fs;
+bcrypt (para criar hash para senhas)
+
+LEMBRAR:
+Quando utilizar "let emailUser = req.body.emailUser" com body, devemos mandar em JSON no postman:
+
+{
+  "emailUser": "debiasivj@gmail.com",
+  "passwordUser": "@123ZZzz"
+}
+
+{
+  "nameUser": "Vinicius",
+  "dayDateUser": "1",
+  "monthDateUser": "1",
+  "yearDateUser": "1980",
+  "emailUser": "debiasivj@gmail.com",
+  "phoneUser": "1234567890",
+  "passwordUser": "!123ZZzz"
+}
+
+aplication.get('/user/:id', async (req, res) => {
+  let idUser = req.params.id;
+  let check = await valid.CheckUserID(idUser);
+
+  if (check.cod == 200) {
+    let user = await funct.SelectUser(idUser);
+    return res.status(check.cod).json(user).end();
+  } else {
+    return res.status(check.cod).json({ message: check.message });
+  }
+});
