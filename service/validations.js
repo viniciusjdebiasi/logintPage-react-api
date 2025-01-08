@@ -3,10 +3,10 @@ const bcrypt = require('bcrypt');
 
 // valida existencia por ID
 async function CheckUserID(param) {
-    const connectionBD = await pool.pool.getConnection();
     if (isNaN(param)) {
         return { status: false, message: 'Invalid value reported', cod: 400 };
     } else {
+        const connectionBD = await pool.pool.getConnection();
         let [rows] = await connectionBD.query('SELECT id FROM users WHERE id = ?', [param]);
         connectionBD.release();
         if (rows.length > 0) {
@@ -74,7 +74,7 @@ async function CheckEmail(paramE) {
         let [rows] = await connectionBD.query('SELECT id FROM users WHERE email = ?', [paramE]);
         connectionBD.release();
         if (rows.length > 0) {
-            return { status: false, message: 'Email already registered', cod: 200 };
+            return { status: false, message: 'Email already registered', cod: 400 };
         } else {
             return { status: true, message: 'Success', cod: 200 };
         }

@@ -1,10 +1,11 @@
 const pool = require('./connection');
 const bcrypt = require('bcrypt');
+const sendEmail = require('./emailnode');
 
 // select
 async function SelectUser(param) {
     const connectionBD = await pool.pool.getConnection();
-    const responseBD = await connectionBD.query('SELECT name, date, email, phone, password, image FROM users WHERE id = ?', [param]);
+    const responseBD = await connectionBD.query('SELECT name, date, email, phone, image FROM users WHERE id = ?', [param]);
     const responseF = responseBD[0]
     connectionBD.release();
     return { status: true, message: responseF, cod: 200 };
@@ -21,23 +22,26 @@ async function InsertUser(paramN, paramD, paramM, paramY, paramE, paramP, paramP
     if (paramFN) {
         const insertUser = await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, paramFN, paramTI]);
         connectionBD.release();
-        return { status: true, message: insertUser, cod: 200 };
+        const send = await sendEmail.sendEmail(paramE, paramN);
+        return { status: true, message: {insertUser, send}, cod: 200 };
     } else {
         const insertUser = await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, '', paramTI]);
         connectionBD.release();
-        return { status: true, message: insertUser, cod: 200 };
+        const send = await sendEmail.sendEmail(paramE, paramN);
+        return { status: true, message: {insertUser, send}, cod: 200 };
     }
 };
 
 // delete
 async function DeleteUser(param) {
     const connectionBD = await pool.pool.getConnection();
-    const deleteUser = connectionBD.query('DELETE FROM users WHERE id = ?', [param])
+    await connectionBD.query('DELETE FROM users WHERE id = ?', [param])
     connectionBD.release();
-    return { status: true, message: deleteUser, cod: 200 };
+    return { status: true, message: 'Success', cod: 200 };
 };
 
 // update
+
 
 exports.SelectUser = SelectUser;
 exports.InsertUser = InsertUser;

@@ -52,7 +52,7 @@ aplication.post('/user', async (req, res) => {
   }
 });
 
-aplication.delete('/user:id', async (req, res) => {
+aplication.delete('/user/:id', async (req, res) => {
   let idUser = req.params.id;
   let check = await valid.CheckUserID(idUser);
   if(check.cod == 200) {
