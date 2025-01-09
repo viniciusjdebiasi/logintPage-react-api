@@ -9,7 +9,7 @@ aplication.use(file());
 aplication.use(express.json());
 aplication.use(cors());
 
-aplication.use('/images', express.static(path.join(__dirname, 'images'))); // imagens estáticas
+aplication.use('/imagesuser', express.static(path.join(__dirname, 'imagesuser'))); // imagens estáticas
 const funct = require('./service/functions'); // funções
 const valid = require('./service/validations'); // validações
 
@@ -56,7 +56,10 @@ aplication.delete('/user/:id', async (req, res) => {
   let idUser = req.params.id;
   let check = await valid.CheckUserID(idUser);
   if(check.cod == 200) {
-    let user = await funct.DeleteUser(idUser);
+    let rows = await funct.SelectUser(idUser);
+    const paramE = rows.message[0].email;
+    const paramN = rows.message[0].name;
+    let user = await funct.DeleteUser(idUser, paramE, paramN);
     return res.status(check.cod).json(user).end();
   } else {
     return res.status(check.cod).json({ message: check.message });
