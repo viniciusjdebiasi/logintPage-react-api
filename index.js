@@ -14,8 +14,8 @@ const funct = require('./service/functions'); // funções
 const valid = require('./service/validations'); // validações
 
 aplication.get('/user', async (req, res) => {
-  let emailUser = req.body.emailUser;
-  let passwordUser = req.body.passwordUser;
+  let emailUser = req.query.emailUser;
+  let passwordUser = req.query.passwordUser;
 
   let check = await valid.CheckUserLogin(emailUser, passwordUser);
 
@@ -23,7 +23,7 @@ aplication.get('/user', async (req, res) => {
     let user = await funct.SelectUser(check.idUser);
     return res.status(check.cod).json(user).end();
   } else {
-    return res.status(check.cod).json({ message: check.message });
+    return res.status(check.cod).json({ message: check.message, status: check.status });
   }
 });
 

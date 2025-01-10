@@ -5,7 +5,7 @@ const sendEmail = require('./emailnode');
 // select
 async function SelectUser(param) {
     const connectionBD = await pool.pool.getConnection();
-    const responseBD = await connectionBD.query('SELECT name, date, email, phone, image FROM users WHERE id = ?', [param]);
+    const responseBD = await connectionBD.query('SELECT id, name, date, email, phone, image FROM users WHERE id = ?', [param]);
     const responseF = responseBD[0]
     connectionBD.release();
     return { status: true, message: responseF, cod: 200 };
