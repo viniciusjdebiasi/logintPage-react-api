@@ -1,6 +1,5 @@
 const pool = require('./connection');
-const bcrypt = require('bcrypt');
-const sendEmail = require('./emailnode');
+const service = require('./services');
 
 // select
 async function SelectUser(param) {
@@ -13,12 +12,9 @@ async function SelectUser(param) {
 
 // insert
 async function InsertUser(paramN, paramD, paramM, paramY, paramE, paramP, paramPW, paramFN) {
-    const saltRounds = 10;
-    let date = new Date();
-    let paramTI = `${date.getHours()}:${date.getMinutes()} ${date.getFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
-    let paramUD = `${paramY}${paramM}${paramD}`;
-    const hashedPassword = await bcrypt.hash(paramPW, saltRounds);
-    const connectionBD = await pool.pool.getConnection();
+    const hashedPassword = await service.CreateHashPassword(paramPW);
+    const paramTI = await service.CreateDate();
+    const paramUD = `${paramY}${paramM}${paramD}`;
     const insertMailOptions = {
         from: 'debiasivj@gmail.com',
         to: paramE,
@@ -33,16 +29,19 @@ async function InsertUser(paramN, paramD, paramM, paramY, paramE, paramP, paramP
             <img src="https://img.freepik.com/fotos-premium/personagem-de-desenho-animado-de-banana-feliz-mostrando-polegares-para-cima-gerado-por-ia_941600-4334.jpg" style="width: 300px; height: auto;" alt="Felicità">
         `
     };
+
+    const connectionBD = await pool.pool.getConnection();
+
     if (paramFN) {
-        const insertUser = await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, paramFN, paramTI]);
+        await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, paramFN, paramTI]);
         connectionBD.release();
-        await sendEmail.sendEmail(insertMailOptions);
-        return { status: true, message: insertUser, cod: 200 };
+        await service.sendEmail(insertMailOptions);
+        return { status: true, message: 'Success', cod: 200 };
     } else {
-        const insertUser = await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, '', paramTI]);
+        await connectionBD.query('INSERT INTO users (name, date, email, phone, password, image, time) VALUES (?, ?, ?, ?, ?, ?, ?)', [paramN, paramUD, paramE, paramP, hashedPassword, '', paramTI]);
         connectionBD.release();
-        await sendEmail.sendEmail(insertMailOptions);
-        return { status: true, message: insertUser, cod: 200 };
+        await service.sendEmail(insertMailOptions);
+        return { status: true, message: 'Success', cod: 200 };
     }
 };
 
@@ -65,12 +64,9 @@ async function DeleteUser(paramID, paramE, paramN) {
             <img src="https://s2.glbimg.com/kOfT4B8Pi8kmS-I9_PwwFuT8tq4=/smart/e.glbimg.com/og/ed/f/original/2015/05/15/minions-filme.jpg" style="width: 300px; height: auto;" alt="Tristezza">
         `
     };
-    await sendEmail.sendEmail(deleteMailOptions);
+    await service.sendEmail(deleteMailOptions);
     return { status: true, message: 'Success', cod: 200 };
 };
-
-// update
-
 
 exports.SelectUser = SelectUser;
 exports.InsertUser = InsertUser;

@@ -1,5 +1,5 @@
 const pool = require('./connection');
-const bcrypt = require('bcrypt');
+const service = require('./services');
 
 // valida existencia por ID
 async function CheckUserID(param) {
@@ -25,8 +25,8 @@ async function CheckUserLogin(paramE, paramP) {
     if (rows.length > 0) {
         let id = rows[0].id;
         const hashedPassword = rows[0].password;
-        const isMatch = await bcrypt.compare(paramP, hashedPassword);
-        if (isMatch) {
+        const compareHshed = await service.ComparePasswordHash(paramP, hashedPassword)
+        if (compareHshed) {
             return { status: true, message: 'Success', cod: 200, idUser: id };
         } else {
             return { status: false, message: 'Incorrect password', cod: 400 };
