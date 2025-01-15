@@ -1,12 +1,14 @@
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const USER = process.env.user;
+const PASS = process.env.pass;
 
 // parametros emails
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'debiasivj@gmail.com',
-        pass: 'dgnr ddyz bznv cmnw'
+        user: USER,
+        pass: PASS
     }
 });
 
