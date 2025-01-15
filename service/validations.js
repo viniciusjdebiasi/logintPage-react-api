@@ -1,5 +1,6 @@
 const pool = require('./connection');
 const service = require('./services');
+const funct = require('./functions');
 
 // valida existencia por ID
 async function CheckUserID(param) {
@@ -20,12 +21,12 @@ async function CheckUserID(param) {
 // valida login por EMAIL e SENHA
 async function CheckUserLogin(paramE, paramP) {
     const connectionBD = await pool.pool.getConnection();
-    let [rows] = await connectionBD.query('SELECT id, password FROM users WHERE email = ?', [paramE]);
+    let [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
     connectionBD.release();
     if (rows.length > 0) {
         let id = rows[0].id;
         const hashedPassword = rows[0].password;
-        const compareHshed = await service.ComparePasswordHash(paramP, hashedPassword)
+        const compareHshed = await service.CompareHash(paramP, hashedPassword);
         if (compareHshed) {
             return { status: true, message: 'Success', cod: 200, idUser: id };
         } else {
@@ -65,18 +66,28 @@ async function CheckDate(paramD, paramM, paramY) {
     }
 };
 
+// valida existencia do email
+async function ValidEmail(paramE) {
+    const connectionBD = await pool.pool.getConnection();
+    let [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
+    connectionBD.release();
+    if (rows.length > 0) {
+        return { status: false, message: 'Email already registered', cod: 400 };
+    } else {
+        return { status: true, message: 'Success', cod: 200 };
+    }
+};
+
 // valida EMAIL
 async function CheckEmail(paramE) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     let validEmail = emailRegex.test(paramE);
     if (validEmail) {
-        const connectionBD = await pool.pool.getConnection();
-        let [rows] = await connectionBD.query('SELECT id FROM users WHERE email = ?', [paramE]);
-        connectionBD.release();
-        if (rows.length > 0) {
-            return { status: false, message: 'Email already registered', cod: 400 };
+        const checkEmail = await ValidEmail(paramE);
+        if (checkEmail.cod == 400) {
+            return checkEmail;
         } else {
-            return { status: true, message: 'Success', cod: 200 };
+            return checkEmail;
         }
     } else {
         return { status: false, message: 'Invalid email', cod: 400 };
@@ -130,6 +141,53 @@ async function CheckValues(paramN, paramD, paramM, paramY, paramE, paramP, param
     }
 };
 
+// valida código usuário para alterar senha
+async function CheckUserCode(paramCU, paramE) {
+    let user = await funct.SelectUserEmail(paramE)
+    let hashUser = user.message[0].code;
+    let check = await service.CompareHash(paramCU, hashUser);
+    if (check) {
+        let idCodeUser = user.message[0].idcode;
+        return { status: true, message: 'Success CheckUserCode', cod: 200, code: idCodeUser };
+    } else {
+        return { status: false, message: 'Invalid code', cod: 400 };
+    }
+};
+
+// valida email x código
+async function CheckEmailCodeUser(paramEmail) {
+    const checkEmail = await ValidEmail(paramEmail);
+    if (checkEmail.cod == 400) {
+        const result = await funct.SelectUserEmail(paramEmail);
+        const userCode = result.message[0].code;
+        if (userCode === null || userCode === '') {
+            return { status: false, message: 'There is no code for the email sent', cod: 400 };
+        } else {
+            return { status: true, message: 'Success', cod: 200 };
+        }
+    } else {
+        return { status: false, message: 'Ivalid email', cod: 400 };
+    }
+};
+
+// valida vefificado = 1 ou 0
+async function CheckVerified(paramEmail) {
+    const result = await funct.SelectUserEmail(paramEmail);
+    const verifiedCode = result.message[0].verified;
+    if(verifiedCode === 1) {
+        const userCode = result.message[0].iduser;
+        const idCode = result.message[0].idcode;
+        return { status: true, message: 'Success', cod: 200, userCode: userCode, idCode: idCode };
+    } else {
+        return { status: false, message: 'Email not enabled to change password', cod: 400 };
+    }
+};
+
+exports.CheckPassword = CheckPassword;
 exports.CheckUserID = CheckUserID;
 exports.CheckUserLogin = CheckUserLogin;
 exports.CheckValues = CheckValues;
+exports.ValidEmail = ValidEmail;
+exports.CheckUserCode = CheckUserCode;
+exports.CheckEmailCodeUser = CheckEmailCodeUser;
+exports.CheckVerified = CheckVerified;

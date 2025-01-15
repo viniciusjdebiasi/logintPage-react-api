@@ -7,12 +7,3 @@ fs;
 bcrypt (para criar hash para senhas);
 nodemailer (para emails);
 
-{
-  "nameUser": "Vinicius",
-  "dayDateUser": "1",
-  "monthDateUser": "1",
-  "yearDateUser": "1980",
-  "emailUser": "debiasivj@gmail.com",
-  "phoneUser": "1234567890",
-  "passwordUser": "!123ZZzz"
-}

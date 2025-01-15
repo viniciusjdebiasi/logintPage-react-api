@@ -23,15 +23,15 @@ async function sendEmail(paramMO) {
 };
 
 // criar hash para senha
-async function CreateHashPassword(paramP) {
+async function CreateHash(paramP) {
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(paramP, saltRounds);
-    return hashedPassword;
+    const hashed = await bcrypt.hash(String(paramP), saltRounds);
+    return hashed;
 };
 
-// comparar hash com senha
-async function ComparePasswordHash(paramP, paramHP) {
-    const isMatch = await bcrypt.compare(paramP, paramHP);
+// comparar hash
+async function CompareHash(paramC, paramCH) {
+    const isMatch = await bcrypt.compare(paramC, paramCH);
     return isMatch;
 };
 
@@ -42,7 +42,17 @@ async function CreateDate() {
     return paramTI;
 }
 
+// criar código
+async function CreateCode() {
+    const min = 100000;
+    const max = 999999;
+    const code = Math.floor(Math.random() * (max - min + 1)) + min;
+    const hashCode = await CreateHash(code);
+    return {hash: hashCode, userCode: code};
+};
+
 exports.sendEmail = sendEmail;
-exports.CreateHashPassword = CreateHashPassword;
+exports.CreateHash = CreateHash;
 exports.CreateDate = CreateDate;
-exports.ComparePasswordHash = ComparePasswordHash;
+exports.CompareHash = CompareHash;
+exports.CreateCode = CreateCode;
