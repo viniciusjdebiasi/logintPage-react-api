@@ -6,10 +6,3 @@ express-fileupload;
 fs;
 bcrypt (para criar hash para senhas);
 nodemailer (para emails);
-
--- VALIDAR SENHA ATUAL DIFERENTE DA NOVA SENHA
--- REENVIAR NOVO CÓDIGO
-
-verificar se existe codigo
-existe: exclui e envia outro
-nao existe: envia novo codigo

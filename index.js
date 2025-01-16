@@ -12,16 +12,15 @@ aplication.use(cors());
 aplication.use('/imagesuser', express.static(path.join(__dirname, 'imagesuser'))); // imagens estáticas
 const funct = require('./service/functions'); // funções
 const valid = require('./service/validations'); // validações
-const service = require('./service/services');
 
 aplication.get('/user', async (req, res) => {
-  let emailUser = req.query.emailUser;
-  let passwordUser = req.query.passwordUser;
+  const emailUser = req.query.emailUser;
+  const passwordUser = req.query.passwordUser;
 
-  let check = await valid.CheckUserLogin(emailUser, passwordUser);
+  const check = await valid.CheckUserLogin(emailUser, passwordUser);
 
   if (check.status) {
-    let user = await funct.SelectUser(check.idUser);
+    const user = await funct.SelectUser(check.idUser);
     return res.status(check.cod).json(user).end();
   } else {
     return res.status(check.cod).json({ message: check.message, status: check.status });
@@ -29,24 +28,24 @@ aplication.get('/user', async (req, res) => {
 });
 
 aplication.post('/user', async (req, res) => {
-  let nameUser = req.body.nameUser;
-  let dayDateUser = req.body.dayDateUser;
-  let monthDateUser = req.body.monthDateUser;
-  let yearDateUser = req.body.yearDateUser;
-  let emailUser = req.body.emailUser;
-  let phoneUser = req.body.phoneUser;
-  let passwordUser = req.body.passwordUser;
+  const nameUser = req.body.nameUser;
+  const dayDateUser = req.body.dayDateUser;
+  const monthDateUser = req.body.monthDateUser;
+  const yearDateUser = req.body.yearDateUser;
+  const emailUser = req.body.emailUser;
+  const phoneUser = req.body.phoneUser;
+  const passwordUser = req.body.passwordUser;
   if (req.files && req.files.image) {
-    let fileUser = req.files.image;
+    const fileUser = req.files.image;
     var fileUserName = fileUser;
     const uploadPath = path.join(__dirname, 'imagesuser', fileUserName);
     await fileUser.mv(uploadPath);
   }
 
-  let check = await valid.CheckValues(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser);
+  const check = await valid.CheckValues(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser);
 
   if (check.status) {
-    let user = await funct.InsertUser(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser, fileUserName);
+    const user = await funct.InsertUser(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser, fileUserName);
     res.status(user.cod).json(user).end();
   } else {
     res.status(check.cod).json({ message: check.message });
@@ -54,12 +53,12 @@ aplication.post('/user', async (req, res) => {
 });
 
 aplication.post('/userchangepassword', async (req, res) => {
-  let emailUser = req.body.emailUser;
-  let check = await valid.ValidEmail(emailUser);
+  const emailUser = req.body.emailUser;
+  const check = await valid.ValidEmail(emailUser);
   if (!check.status) {
-    let id = await funct.SelectUserEmail(emailUser);
-    let idUser = id.message[0].iduser;
-    let inserCode = await funct.InsertCode(idUser, emailUser);
+    const id = await funct.SelectUserEmail(emailUser);
+    const idUser = id.message[0].iduser;
+    const inserCode = await funct.InsertCode(idUser, emailUser);
     res.status(inserCode.cod).json(inserCode).end();
   } else {
     res.status(400).json({ status: false, message: 'There is no user with this email' });
@@ -71,13 +70,13 @@ aplication.post('/userchangepassword-newcodice', async (req, res) => {
 });
 
 aplication.patch('/verifycode', async (req, res) => {
-  let codeUser = req.body.codeUser;
-  let emailUser = req.body.emailUser;
+  const codeUser = req.body.codeUser;
+  const emailUser = req.body.emailUser;
   const checkEmail = await valid.CheckEmailCodeUser(emailUser);
   if (checkEmail.status) {
-    let check = await valid.CheckUserCode(codeUser, emailUser);
+    const check = await valid.CheckUserCode(codeUser, emailUser);
     if (check.cod == 200) {
-      let code = await funct.ChangeVerifyed(check.code);
+      const code = await funct.ChangeVerifyed(check.code);
       res.status(code.cod).json(code).end();
     } else {
       return res.status(check.cod).json({ message: check.message });
@@ -115,13 +114,13 @@ aplication.patch('/newpassword', async (req, res) => {
 });
 
 aplication.delete('/user/:id', async (req, res) => {
-  let idUser = req.params.id;
-  let check = await valid.CheckUserID(idUser);
+  const idUser = req.params.id;
+  const check = await valid.CheckUserID(idUser);
   if (check.status) {
-    let rows = await funct.SelectUser(idUser);
+    const rows = await funct.SelectUser(idUser);
     const paramE = rows.message[0].email;
     const paramN = rows.message[0].name;
-    let user = await funct.DeleteUser(idUser, paramE, paramN);
+    const user = await funct.DeleteUser(idUser, paramE, paramN);
     return res.status(check.cod).json(user).end();
   } else {
     return res.status(check.cod).json({ message: check.message });
@@ -129,6 +128,6 @@ aplication.delete('/user/:id', async (req, res) => {
 });
 
 aplication.listen(PORT, async () => {
-  let date = new Date();
+  const date = new Date();
   console.log(`SERVER STARTED | ${date} | LOCALHOST: ${PORT}`);
 });

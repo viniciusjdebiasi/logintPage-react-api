@@ -8,7 +8,7 @@ async function CheckUserID(param) {
         return { status: false, message: 'Invalid value reported', cod: 400 };
     } else {
         const connectionBD = await pool.pool.getConnection();
-        let [rows] = await connectionBD.query('SELECT id FROM users WHERE id = ?', [param]);
+        const service = require('./service/services'); [rows] = await connectionBD.query('SELECT id FROM users WHERE id = ?', [param]);
         connectionBD.release();
         if (rows.length > 0) {
             return { status: true, message: 'Success', cod: 200 };
@@ -21,10 +21,10 @@ async function CheckUserID(param) {
 // valida login por EMAIL e SENHA
 async function CheckUserLogin(paramE, paramP) {
     const connectionBD = await pool.pool.getConnection();
-    let [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
+    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
     connectionBD.release();
     if (rows.length > 0) {
-        let id = rows[0].id;
+        const id = rows[0].id;
         const hashedPassword = rows[0].password;
         const compareHshed = await service.CompareHash(paramP, hashedPassword);
         if (compareHshed) {
@@ -40,7 +40,7 @@ async function CheckUserLogin(paramE, paramP) {
 // valida NOME
 async function CheckName(paramN) {
     const nameRegex = /^[a-zA-ZÀ-ÿ\s]{2,}$/;
-    let validName = nameRegex.test(paramN);
+    const validName = nameRegex.test(paramN);
     if (validName) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
@@ -52,9 +52,9 @@ async function CheckName(paramN) {
 async function CheckDate(paramD, paramM, paramY) {
     const date = new Date();
     const year = date.getFullYear();
-    let validD = paramD >= 1 && paramD <= 31;
-    let validM = paramM >= 1 && paramM <= 12;
-    let validY = paramY >= (year - 110) && paramY <= year;
+    const validD = paramD >= 1 && paramD <= 31;
+    const validM = paramM >= 1 && paramM <= 12;
+    const validY = paramY >= (year - 110) && paramY <= year;
     if (validD && validM && validY) {
         return { status: true, message: 'Success', cod: 200 };
     } else if (!validD) {
@@ -69,7 +69,7 @@ async function CheckDate(paramD, paramM, paramY) {
 // valida existencia do email
 async function ValidEmail(paramE) {
     const connectionBD = await pool.pool.getConnection();
-    let [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
+    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
     connectionBD.release();
     if (rows.length > 0) {
         return { status: false, message: 'Email already registered', cod: 400 };
@@ -81,7 +81,7 @@ async function ValidEmail(paramE) {
 // valida EMAIL
 async function CheckEmail(paramE) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    let validEmail = emailRegex.test(paramE);
+    const validEmail = emailRegex.test(paramE);
     if (validEmail) {
         const checkEmail = await ValidEmail(paramE);
         if (checkEmail.cod == 400) {
@@ -97,7 +97,7 @@ async function CheckEmail(paramE) {
 // valida TELEFONE
 async function CheckPhone(paramP) {
     const phoneRegex = /^\+?\d{9,15}$/;
-    let validPhone = phoneRegex.test(paramP);
+    const validPhone = phoneRegex.test(paramP);
     if (validPhone) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
@@ -120,11 +120,11 @@ async function CheckPassword(paramP) {
 
 // valida dados retornados por usuário
 async function CheckValues(paramN, paramD, paramM, paramY, paramE, paramP, paramPW) {
-    let checkName = await CheckName(paramN);
-    let checkDate = await CheckDate(paramD, paramM, paramY);
-    let checkEmail = await CheckEmail(paramE);
-    let checkPhone = await CheckPhone(paramP);
-    let checkPassword = await CheckPassword(paramPW);
+    const checkName = await CheckName(paramN);
+    const checkDate = await CheckDate(paramD, paramM, paramY);
+    const checkEmail = await CheckEmail(paramE);
+    const checkPhone = await CheckPhone(paramP);
+    const checkPassword = await CheckPassword(paramPW);
 
     if (checkName.status && checkDate.status && checkEmail.status && checkPhone.status && checkPassword.status) {
         return { status: true, message: 'Success', cod: 200 };

@@ -57,9 +57,9 @@ async function InsertUser(paramN, paramD, paramM, paramY, paramE, paramP, paramP
 // insert CODE
 async function InsertCode(paramUID, paramE) {
     const paramVerified = 0;
-    let code = await service.CreateCode();
-    let userCode = code.userCode;
-    let hashCode = code.hash;
+    const code = await service.CreateCode();
+    const userCode = code.userCode;
+    const hashCode = code.hash;
     const insertMailOptions = {
         from: 'debiasivj@gmail.com',
         to: paramE,
@@ -114,8 +114,8 @@ async function ChangeVerifyed(paramCU) {
 async function ChangePassword(paramNewPassword, paramUserCode, paramIdCode, paramEmail) {
     const newpasswordHash = await service.CreateHash(paramNewPassword);
     const connectionBD = await pool.pool.getConnection();
-    let changePassword = await connectionBD.query('UPDATE users SET password = ? WHERE id = ?', [newpasswordHash, paramUserCode]);
-    let deleteCode = await connectionBD.query('DELETE FROM passwordrecoverycode WHERE id = ?', [paramIdCode]);
+    await connectionBD.query('UPDATE users SET password = ? WHERE id = ?', [newpasswordHash, paramUserCode]);
+    await connectionBD.query('DELETE FROM passwordrecoverycode WHERE id = ?', [paramIdCode]);
     connectionBD.release();
     const insertMailOptions = {
         from: 'debiasivj@gmail.com',
