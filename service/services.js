@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // enviar email
-async function sendEmail(paramMO) {
-    const mailOptions = paramMO;
+async function sendEmail(paramMailOptions) {
+    const mailOptions = paramMailOptions;
 
     try {
         const info = await transporter.sendMail(mailOptions);
@@ -25,15 +25,15 @@ async function sendEmail(paramMO) {
 };
 
 // criar hash para senha
-async function CreateHash(paramP) {
+async function CreateHash(paramPassword) {
     const saltRounds = 10;
-    const hashed = await bcrypt.hash(String(paramP), saltRounds);
+    const hashed = await bcrypt.hash(String(paramPassword), saltRounds);
     return hashed;
 };
 
 // comparar hash
-async function CompareHash(paramC, paramCH) {
-    const isMatch = await bcrypt.compare(paramC, paramCH);
+async function CompareHash(paramUserValue, paramStoredValue) {
+    const isMatch = await bcrypt.compare(paramUserValue, paramStoredValue);
     return isMatch;
 };
 

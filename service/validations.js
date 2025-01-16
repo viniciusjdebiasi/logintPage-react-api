@@ -3,12 +3,12 @@ const service = require('./services');
 const funct = require('./functions');
 
 // valida existencia por ID
-async function CheckUserID(param) {
-    if (isNaN(param)) {
+async function CheckUserID(paramId) {
+    if (isNaN(paramId)) {
         return { status: false, message: 'Invalid value reported', cod: 400 };
     } else {
         const connectionBD = await pool.pool.getConnection();
-        const service = require('./service/services'); [rows] = await connectionBD.query('SELECT id FROM users WHERE id = ?', [param]);
+        const [rows] = await connectionBD.query('SELECT id FROM users WHERE id = ?', [paramId]);
         connectionBD.release();
         if (rows.length > 0) {
             return { status: true, message: 'Success', cod: 200 };
@@ -19,14 +19,14 @@ async function CheckUserID(param) {
 };
 
 // valida login por EMAIL e SENHA
-async function CheckUserLogin(paramE, paramP) {
+async function CheckUserLogin(paramEmail, paramPassword) {
     const connectionBD = await pool.pool.getConnection();
-    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
+    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramEmail]);
     connectionBD.release();
     if (rows.length > 0) {
         const id = rows[0].id;
         const hashedPassword = rows[0].password;
-        const compareHshed = await service.CompareHash(paramP, hashedPassword);
+        const compareHshed = await service.CompareHash(paramPassword, hashedPassword);
         if (compareHshed) {
             return { status: true, message: 'Success', cod: 200, idUser: id };
         } else {
@@ -37,10 +37,24 @@ async function CheckUserLogin(paramE, paramP) {
     }
 };
 
+// valida senha antiga x senha atual
+async function NewXOldPassword(paramNewPassword, paramEmail) {
+    const connectionBD = await pool.pool.getConnection();
+    const [result] = await connectionBD.query('SELECT password FROM users WHERE email = ?', [paramEmail]);
+    console.log(result, 'aqui')
+    const oldUserPassword = result[0].password;
+    const compareHash = await service.CompareHash(paramNewPassword, oldUserPassword);
+    if(compareHash) {
+        return { status: false, message: 'Current password is the same as the previous one', cod: 400 }
+    } else {
+        return { status: true, message: 'Success', cod: 200 };
+    }
+};
+
 // valida NOME
-async function CheckName(paramN) {
+async function CheckName(paramName) {
     const nameRegex = /^[a-zA-ZÀ-ÿ\s]{2,}$/;
-    const validName = nameRegex.test(paramN);
+    const validName = nameRegex.test(paramName);
     if (validName) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
@@ -49,27 +63,27 @@ async function CheckName(paramN) {
 };
 
 // valida DATA
-async function CheckDate(paramD, paramM, paramY) {
+async function CheckDate(paramDay, paramMonth, paramYear) {
     const date = new Date();
     const year = date.getFullYear();
-    const validD = paramD >= 1 && paramD <= 31;
-    const validM = paramM >= 1 && paramM <= 12;
-    const validY = paramY >= (year - 110) && paramY <= year;
-    if (validD && validM && validY) {
+    const validDay = paramDay >= 1 && paramDay <= 31;
+    const validMonth = paramMonth >= 1 && paramMonth <= 12;
+    const validYear = paramYear >= (year - 110) && paramYear <= year;
+    if (validDay && validMonth && validYear) {
         return { status: true, message: 'Success', cod: 200 };
-    } else if (!validD) {
+    } else if (!validDay) {
         return { status: false, message: 'Invalid day', cod: 400 };
-    } else if (!validM) {
+    } else if (!validMonth) {
         return { status: false, message: 'Invalid month', cod: 400 };
-    } else if (!validY) {
+    } else if (!validYear) {
         return { status: false, message: 'Invalid year', cod: 400 };
     }
 };
 
 // valida existencia do email
-async function ValidEmail(paramE) {
+async function ValidEmail(paramEmail) {
     const connectionBD = await pool.pool.getConnection();
-    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramE]);
+    const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramEmail]);
     connectionBD.release();
     if (rows.length > 0) {
         return { status: false, message: 'Email already registered', cod: 400 };
@@ -79,11 +93,11 @@ async function ValidEmail(paramE) {
 };
 
 // valida EMAIL
-async function CheckEmail(paramE) {
+async function CheckEmail(paramEmail) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const validEmail = emailRegex.test(paramE);
+    const validEmail = emailRegex.test(paramEmail);
     if (validEmail) {
-        const checkEmail = await ValidEmail(paramE);
+        const checkEmail = await ValidEmail(paramEmail);
         if (checkEmail.cod == 400) {
             return checkEmail;
         } else {
@@ -95,9 +109,9 @@ async function CheckEmail(paramE) {
 };
 
 // valida TELEFONE
-async function CheckPhone(paramP) {
+async function CheckPhone(paramPhone) {
     const phoneRegex = /^\+?\d{9,15}$/;
-    const validPhone = phoneRegex.test(paramP);
+    const validPhone = phoneRegex.test(paramPhone);
     if (validPhone) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
@@ -106,7 +120,7 @@ async function CheckPhone(paramP) {
 };
 
 // valida SENHA
-async function CheckPassword(paramP) {
+async function CheckPassword(paramPassword) {
     const passwordRules = [
         { passwordRegex: /[A-Z]/, message: "Must contain at least one capital letter" },
         { passwordRegex: /[a-z]/, message: "Must contain at least one lowercase letter" },
@@ -114,17 +128,17 @@ async function CheckPassword(paramP) {
         { passwordRegex: /[@$!%*?&]/, message: "Must contain at least one special character (@$!%*?&)" },
         { passwordRegex: /.{8,}/, message: "Must be at least 8 characters long" }
     ];
-    const errors = passwordRules.filter(rules => !rules.passwordRegex.test(paramP)).map(rules => rules.message)
+    const errors = passwordRules.filter(rules => !rules.passwordRegex.test(paramPassword)).map(rules => rules.message)
     return errors.length > 0 ? { status: false, message: errors, cod: 400 } : { status: true, message: 'Success', cod: 200 };
 };
 
 // valida dados retornados por usuário
-async function CheckValues(paramN, paramD, paramM, paramY, paramE, paramP, paramPW) {
-    const checkName = await CheckName(paramN);
-    const checkDate = await CheckDate(paramD, paramM, paramY);
-    const checkEmail = await CheckEmail(paramE);
-    const checkPhone = await CheckPhone(paramP);
-    const checkPassword = await CheckPassword(paramPW);
+async function CheckValues(paramName, paramDay, paramMonth, paramYear, paramEmail, paramPhone, paramPassword) {
+    const checkName = await CheckName(paramName);
+    const checkDate = await CheckDate(paramDay, paramMonth, paramYear);
+    const checkEmail = await CheckEmail(paramEmail);
+    const checkPhone = await CheckPhone(paramPhone);
+    const checkPassword = await CheckPassword(paramPassword);
 
     if (checkName.status && checkDate.status && checkEmail.status && checkPhone.status && checkPassword.status) {
         return { status: true, message: 'Success', cod: 200 };
@@ -166,7 +180,7 @@ async function CheckEmailCodeUser(paramEmail) {
             return { status: true, message: 'Success', cod: 200 };
         }
     } else {
-        return { status: false, message: 'Ivalid email', cod: 400 };
+        return { status: false, message: 'Ivalid email', cod: 401 };
     }
 };
 
@@ -191,3 +205,4 @@ exports.ValidEmail = ValidEmail;
 exports.CheckUserCode = CheckUserCode;
 exports.CheckEmailCodeUser = CheckEmailCodeUser;
 exports.CheckVerified = CheckVerified;
+exports.NewXOldPassword = NewXOldPassword;
