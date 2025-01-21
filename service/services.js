@@ -1,18 +1,16 @@
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
-//const USER = process.env.user;
-//const PASS = process.env.pass;
+const USER = process.env.user;
+const PASS = process.env.pass;
 
-// parametros emails
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'debiasivj@gmail.com',
-        pass: 'odxe homu aixr uonu'
+        user: USER,
+        pass: PASS
     }
 });
 
-// enviar email
 async function sendEmail(paramMailOptions) {
     const mailOptions = paramMailOptions;
 
@@ -24,27 +22,23 @@ async function sendEmail(paramMailOptions) {
     }
 };
 
-// criar hash para senha
 async function CreateHash(paramPassword) {
     const saltRounds = 10;
     const hashed = await bcrypt.hash(String(paramPassword), saltRounds);
     return hashed;
 };
 
-// comparar hash
 async function CompareHash(paramUserValue, paramStoredValue) {
     const isMatch = await bcrypt.compare(paramUserValue, paramStoredValue);
     return isMatch;
 };
 
-// criar data
 async function CreateDate() {
-    let date = new Date();
-    let paramTI = `${date.getHours()}:${date.getMinutes()} ${date.getFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
+    const date = new Date();
+    const paramTI = `${date.getHours()}:${date.getMinutes()} ${date.getFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
     return paramTI;
 }
 
-// criar código
 async function CreateCode() {
     const min = 100000;
     const max = 999999;
