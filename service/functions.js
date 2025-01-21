@@ -1,7 +1,6 @@
 const pool = require('./connection');
 const service = require('./services');
 
-// select USER por id
 async function SelectUser(paramId) {
     const connectionBD = await pool.pool.getConnection();
     const responseBD = await connectionBD.query('SELECT id, name, date, email, phone, image FROM users WHERE id = ?', [paramId]);
@@ -10,16 +9,14 @@ async function SelectUser(paramId) {
     return { status: true, message: responseF, cod: 200 };
 };
 
-// select por email
 async function SelectUserEmail(paramEmail) {
     const connectionBD = await pool.pool.getConnection();
-    const responseBD = await connectionBD.query('SELECT u.id AS iduser, prc.id AS idcode, prc.userid, prc.code, u.name, u.date, u.email, u.phone, prc.verified FROM passwordrecoverycode AS prc RIGHT JOIN users AS u ON u.id = prc.userid WHERE u.email = ?', [paramEmail]);
+    const responseBD = await connectionBD.query('SELECT u.id AS iduser, u.id As id, prc.id AS idcode, prc.userid, prc.code, u.name, u.date, u.email, u.phone, prc.verified, u.image FROM passwordrecoverycode AS prc RIGHT JOIN users AS u ON u.id = prc.userid WHERE u.email = ?', [paramEmail]);
     const responseF = responseBD[0];
     connectionBD.release();
     return { status: true, message: responseF, cod: 200 };
 };
 
-// insert USER
 async function InsertUser(paramName, paramDay, paramMonth, paramYear, paramEmail, paramPhone, paramPassword, paramFileName) {
     const hashedPassword = await service.CreateHash(paramPassword);
     const paramTimeInsert = await service.CreateDate();
@@ -54,7 +51,6 @@ async function InsertUser(paramName, paramDay, paramMonth, paramYear, paramEmail
     }
 };
 
-// insert CODE
 async function InsertCode(paramUserId, paramEmail) {
     const paramVerified = 0;
     const code = await service.CreateCode();
@@ -77,7 +73,6 @@ async function InsertCode(paramUserId, paramEmail) {
     return { status: true, message: 'Success', cod: 200 };
 };
 
-// delete user
 async function DeleteUser(paramIdUser, paramEmail, paramName) {
     const connectionBD = await pool.pool.getConnection();
     await connectionBD.query('DELETE FROM users WHERE id = ?', [paramIdUser])
@@ -100,7 +95,6 @@ async function DeleteUser(paramIdUser, paramEmail, paramName) {
     return { status: true, message: 'Success', cod: 200 };
 };
 
-// delete 
 async function DeleteCode(paramIdCode) {
     const connectionBD = await pool.pool.getConnection();
     await connectionBD.query('DELETE FROM passwordrecoverycode WHERE id = ?', [paramIdCode])
@@ -108,7 +102,6 @@ async function DeleteCode(paramIdCode) {
     return { status: true, message: 'Success', cod: 200 };
 }
 
-// update code verificar
 async function ChangeVerifyed(paramCodeUser) {
     const connectionBD = await pool.pool.getConnection();
     await connectionBD.query('UPDATE passwordrecoverycode SET verified = 1 WHERE id = ?', [paramCodeUser])
@@ -116,7 +109,6 @@ async function ChangeVerifyed(paramCodeUser) {
     return { status: true, message: 'Success', cod: 200 };
 };
 
-// update new password
 async function ChangePassword(paramNewPassword, paramUserCode, paramIdCode, paramEmail) {
     const newpasswordHash = await service.CreateHash(paramNewPassword);
     const connectionBD = await pool.pool.getConnection();

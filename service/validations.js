@@ -2,7 +2,6 @@ const pool = require('./connection');
 const service = require('./services');
 const funct = require('./functions');
 
-// valida existencia por ID
 async function CheckUserID(paramId) {
     if (isNaN(paramId)) {
         return { status: false, message: 'Invalid value reported', cod: 400 };
@@ -18,7 +17,6 @@ async function CheckUserID(paramId) {
     }
 };
 
-// valida login por EMAIL e SENHA
 async function CheckUserLogin(paramEmail, paramPassword) {
     const connectionBD = await pool.pool.getConnection();
     const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramEmail]);
@@ -37,21 +35,18 @@ async function CheckUserLogin(paramEmail, paramPassword) {
     }
 };
 
-// valida senha antiga x senha atual
 async function NewXOldPassword(paramNewPassword, paramEmail) {
     const connectionBD = await pool.pool.getConnection();
     const [result] = await connectionBD.query('SELECT password FROM users WHERE email = ?', [paramEmail]);
-    console.log(result, 'aqui')
     const oldUserPassword = result[0].password;
     const compareHash = await service.CompareHash(paramNewPassword, oldUserPassword);
-    if(compareHash) {
+    if (compareHash) {
         return { status: false, message: 'Current password is the same as the previous one', cod: 400 }
     } else {
         return { status: true, message: 'Success', cod: 200 };
     }
 };
 
-// valida NOME
 async function CheckName(paramName) {
     const nameRegex = /^[a-zA-ZÀ-ÿ\s]{2,}$/;
     const validName = nameRegex.test(paramName);
@@ -62,7 +57,6 @@ async function CheckName(paramName) {
     }
 };
 
-// valida DATA
 async function CheckDate(paramDay, paramMonth, paramYear) {
     const date = new Date();
     const year = date.getFullYear();
@@ -80,7 +74,6 @@ async function CheckDate(paramDay, paramMonth, paramYear) {
     }
 };
 
-// valida existencia do email
 async function ValidEmail(paramEmail) {
     const connectionBD = await pool.pool.getConnection();
     const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramEmail]);
@@ -92,7 +85,6 @@ async function ValidEmail(paramEmail) {
     }
 };
 
-// valida EMAIL
 async function CheckEmail(paramEmail) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const validEmail = emailRegex.test(paramEmail);
@@ -108,7 +100,6 @@ async function CheckEmail(paramEmail) {
     }
 };
 
-// valida TELEFONE
 async function CheckPhone(paramPhone) {
     const phoneRegex = /^\+?\d{9,15}$/;
     const validPhone = phoneRegex.test(paramPhone);
@@ -119,7 +110,6 @@ async function CheckPhone(paramPhone) {
     }
 };
 
-// valida SENHA
 async function CheckPassword(paramPassword) {
     const passwordRules = [
         { passwordRegex: /[A-Z]/, message: "Must contain at least one capital letter" },
@@ -132,7 +122,6 @@ async function CheckPassword(paramPassword) {
     return errors.length > 0 ? { status: false, message: errors, cod: 400 } : { status: true, message: 'Success', cod: 200 };
 };
 
-// valida dados retornados por usuário
 async function CheckValues(paramName, paramDay, paramMonth, paramYear, paramEmail, paramPhone, paramPassword) {
     const checkName = await CheckName(paramName);
     const checkDate = await CheckDate(paramDay, paramMonth, paramYear);
@@ -155,20 +144,18 @@ async function CheckValues(paramName, paramDay, paramMonth, paramYear, paramEmai
     }
 };
 
-// valida código usuário para alterar senha
 async function CheckUserCode(paramCU, paramE) {
-    let user = await funct.SelectUserEmail(paramE)
-    let hashUser = user.message[0].code;
-    let check = await service.CompareHash(paramCU, hashUser);
+    const user = await funct.SelectUserEmail(paramE)
+    const hashUser = user.message[0].code;
+    const check = await service.CompareHash(paramCU, hashUser);
     if (check) {
-        let idCodeUser = user.message[0].idcode;
+        const idCodeUser = user.message[0].idcode;
         return { status: true, message: 'Success CheckUserCode', cod: 200, code: idCodeUser };
     } else {
         return { status: false, message: 'Invalid code', cod: 400 };
     }
 };
 
-// valida email x código
 async function CheckEmailCodeUser(paramEmail) {
     const checkEmail = await ValidEmail(paramEmail);
     if (checkEmail.cod == 400) {
@@ -184,11 +171,10 @@ async function CheckEmailCodeUser(paramEmail) {
     }
 };
 
-// valida vefificado = 1 ou 0
 async function CheckVerified(paramEmail) {
     const result = await funct.SelectUserEmail(paramEmail);
     const verifiedCode = result.message[0].verified;
-    if(verifiedCode === 1) {
+    if (verifiedCode === 1) {
         const userCode = result.message[0].iduser;
         const idCode = result.message[0].idcode;
         return { status: true, message: 'Success', cod: 200, userCode: userCode, idCode: idCode };

@@ -5,11 +5,11 @@ const fs = require('fs').promises;
 const path = require('path');
 const aplication = express();
 const PORT = 1110;
-aplication.use(file());
 aplication.use(express.json());
 aplication.use(cors());
-
+aplication.use(file());
 aplication.use('/imagesuser', express.static(path.join(__dirname, 'imagesuser')));
+
 const funct = require('./service/functions');
 const valid = require('./service/validations');
 
@@ -35,18 +35,19 @@ aplication.post('/user', async (req, res) => {
   const emailUser = req.body.emailUser;
   const phoneUser = req.body.phoneUser;
   const passwordUser = req.body.passwordUser;
-  if (req.files && req.files.image) {
-    const fileUser = req.files.image;
-    var fileUserName = fileUser;
-    const uploadPath = path.join(__dirname, 'imagesuser', fileUserName);
-    await fileUser.mv(uploadPath);
-  }
 
   const checkValues = await valid.CheckValues(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser);
 
   if (checkValues.status) {
     const user = await funct.InsertUser(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser, fileUserName);
-    res.status(user.cod).json(user).end();
+    if (req.files && req.files.image) {
+      const fileUser = req.files.image;
+      var fileUserName = fileUser.name;
+      const uploadPath = path.join(__dirname, 'imagesuser', fileUserName);
+      await fileUser.mv(uploadPath);
+    }
+    const newUser = await funct.SelectUserEmail(emailUser);
+    res.status(user.cod).json(newUser).end();
   } else {
     res.status(checkValues.cod).json({ message: checkValues.message });
   }
@@ -56,10 +57,15 @@ aplication.post('/userchangepassword', async (req, res) => {
   const emailUser = req.body.emailUser;
   const checkEmailUser = await valid.ValidEmail(emailUser);
   if (!checkEmailUser.status) {
-    const id = await funct.SelectUserEmail(emailUser);
-    const idUser = id.message[0].iduser;
-    const inserCode = await funct.InsertCode(idUser, emailUser);
-    res.status(inserCode.cod).json(inserCode).end();
+    const checkCodeExisting = await valid.CheckEmailCodeUser(emailUser);
+    if (checkCodeExisting.cod == 400) {
+      const id = await funct.SelectUserEmail(emailUser);
+      const idUser = id.message[0].iduser;
+      const inserCode = await funct.InsertCode(idUser, emailUser);
+      res.status(inserCode.cod).json(inserCode).end();
+    } else {
+      res.status(400).json({ status: false, message: 'A code has already been sent' });
+    }
   } else {
     res.status(400).json({ status: false, message: 'There is no user with this email' });
   }
@@ -140,9 +146,14 @@ aplication.delete('/user/:id', async (req, res) => {
   const checkUserId = await valid.CheckUserID(idUser);
   if (checkUserId.status) {
     const rows = await funct.SelectUser(idUser);
-    const paramE = rows.message[0].email;
-    const paramN = rows.message[0].name;
-    const user = await funct.DeleteUser(idUser, paramE, paramN);
+    const paramEmail = rows.message[0].email;
+    const paramName = rows.message[0].name;
+    const paramImage = rows.message[0].image;
+    const user = await funct.DeleteUser(idUser, paramEmail, paramName);
+    if (paramImage !== null && paramImage !== '') {
+      const deletePath = path.join(__dirname, 'imagesuser', paramImage);
+      await fs.unlink(deletePath);
+    }
     return res.status(checkUserId.cod).json(user).end();
   } else {
     return res.status(checkUserId.cod).json({ message: checkUserId.message });
