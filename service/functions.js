@@ -25,15 +25,27 @@ async function InsertUser(paramName, paramDay, paramMonth, paramYear, paramEmail
         from: 'debiasivj@gmail.com',
         to: paramEmail,
         subject: "Creazione dell'account - Pagina di Acesso",
-        html: `
-            <h1>Ciao ${paramName}!</h1>
-            <p style="font-size: 22px;">
-                Stai ricevendo un'e-mail perché il tuo account nella <br>
-                <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: green;">Pagina di Accesso</a> è stato creato correttamente!
-                <h2 style="font-size: 25px;">Grazie!</h2>
-            </p>
-            <img src="https://img.freepik.com/fotos-premium/personagem-de-desenho-animado-de-banana-feliz-mostrando-polegares-para-cima-gerado-por-ia_941600-4334.jpg" style="width: 300px; height: auto;" alt="Felicità">
-        `
+        html: 
+`
+    <div style="text-align: center;">
+      <div style="background-color: #9400D3; width: 100%; max-width: 460px; height: 30px; "></div>
+
+      <div style="font-size: 22px; text-align: justify; max-width: 450px; padding: 2px; ">
+        <h2 style="text-align: left; ">Ciao ${paramName}!</h2>
+        <p>
+          Stai ricevendo un'e-mail perché il tuo account nella
+          <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3; ">Pagina di Accesso</a> è stato creato correttamente!
+          <h2 style="font-size: 25px; ">Grazie!</h2>
+        </p>
+      </div>
+
+      <div style="width: 100%; text-align: center; max-width: 460px; ">
+        <img src="https://img.freepik.com/fotos-premium/personagem-de-desenho-animado-de-banana-feliz-mostrando-polegares-para-cima-gerado-por-ia_941600-4334.jpg" style="width: 350px; height: auto;" alt="Felicità">
+      </div>
+      
+      <div style="background-color: #9400D3; width: 460px; height: 30px; margin-top: 20px; "></div>
+    </div>
+`
     };
 
     const connectionBD = await pool.pool.getConnection();
@@ -60,12 +72,23 @@ async function InsertCode(paramUserId, paramEmail) {
         from: 'debiasivj@gmail.com',
         to: paramEmail,
         subject: "Codice per cambiare password",
-        html: `
-            <h1>Ciao!</h1>
-            <p style="font-size: 22px;">
-                Questo è il codice per cambiare la password: <h2>${userCode}</h2>
-            </p>
-        `
+        html: 
+`
+<div style="text-align: center; max-width: 460px;" >
+      <div style="background-color: #9400D3; width: 100%; max-width: 460px; height: 30px; "></div>
+
+      <div style="font-size: 22px; text-align: justify; max-width: 450px; padding: 2px; ">
+        <h2 style="text-align: left; ">Ciao!</h2>
+        <p>
+          Questo è il codice per cambiare la password: 
+        </p>
+      </div>
+
+      <h2 style="letter-spacing: 1rem; color: #9400D3; font-size: 25px; ">${userCode}</h2>
+      
+      <div style="background-color: #9400D3; width: 460px; height: 30px; margin-top: 20px; "></div>
+    </div>
+`
     };
     const connectionBD = await pool.pool.getConnection();
     await connectionBD.query('INSERT INTO passwordrecoverycode (userid, code, verified) VALUES (?, ?, ?)', [paramUserId, hashCode, paramVerified]);
@@ -81,15 +104,27 @@ async function DeleteUser(paramIdUser, paramEmail, paramName) {
         from: 'debiasivj@gmail.com',
         to: paramEmail,
         subject: "Eliminazione dell'account - Pagina di Acesso",
-        html: `
-            <h1>Ciao ${paramName}!</h1>
-            <p style="font-size: 22px;">
+        html: 
+`
+    <div style="text-align: center;">
+      <div style="background-color: #9400D3; width: 100%; max-width: 460px; height: 30px; "></div>
+
+      <div style="font-size: 22px; text-align: justify; max-width: 450px; padding: 2px; ">
+        <h2 style="text-align: left; ">Ciao ${paramName}!</h2>
+        <p style="font-size: 22px;">
                 Stai ricevendo un'e-mail perché il tuo account nella <br>
-                <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: green;">Pagina di Accesso</a> è stata esclusa correttamente!
+                <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stata esclusa correttamente!
                 <h2 style="font-size: 25px;">Arrivederci!</h2>
             </p>
-            <img src="https://s2.glbimg.com/kOfT4B8Pi8kmS-I9_PwwFuT8tq4=/smart/e.glbimg.com/og/ed/f/original/2015/05/15/minions-filme.jpg" style="width: 300px; height: auto;" alt="Tristezza">
-        `
+      </div>
+
+      <div style="width: 100%; text-align: center; max-width: 460px; ">
+        <img src="https://s2.glbimg.com/kOfT4B8Pi8kmS-I9_PwwFuT8tq4=/smart/e.glbimg.com/og/ed/f/original/2015/05/15/minions-filme.jpg" style="width: 350px; height: auto;" alt="Felicità">
+      </div>
+      
+      <div style="background-color: #9400D3; width: 460px; height: 30px; margin-top: 20px; "></div>
+    </div>
+`
     };
     await service.sendEmail(deleteMailOptions);
     return { status: true, message: 'Success', cod: 200 };
@@ -119,14 +154,22 @@ async function ChangePassword(paramNewPassword, paramUserCode, paramIdCode, para
         from: 'debiasivj@gmail.com',
         to: paramEmail,
         subject: "Modifica password - Pagina di Acesso",
-        html: `
-            <h1>Ciao!</h1>
-            <p style="font-size: 22px;">
-                Stai ricevendo un'e-mail perché il tuo password sulla <br>
-                <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: green;">Pagina di Accesso</a> è stato modificato correttamente!
-                <h2 style="font-size: 25px;">Grazie!</h2>
-            </p>
-        `
+        html: 
+`
+<div style="text-align: center; max-width: 460px;" >
+      <div style="background-color: #9400D3; width: 100%; max-width: 460px; height: 30px; "></div>
+
+      <div style="font-size: 22px; text-align: justify; max-width: 450px; padding: 2px; ">
+        <h2 style="text-align: left; ">Ciao!</h2>
+        <p>
+          Stai ricevendo un'e-mail perché il tuo password sulla <br>
+            <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stato modificato correttamente! 
+        </p>
+      </div>
+      
+      <div style="background-color: #9400D3; width: 460px; height: 30px; margin-top: 20px; "></div>
+    </div>
+`
     };
     await service.sendEmail(insertMailOptions);
     return { status: true, message: 'Success', cod: 200 };

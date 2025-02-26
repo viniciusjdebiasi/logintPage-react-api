@@ -9,7 +9,6 @@ aplication.use(express.json());
 aplication.use(cors());
 aplication.use(file());
 aplication.use('/imagesuser', express.static(path.join(__dirname, 'imagesuser')));
-
 const funct = require('./service/functions');
 const valid = require('./service/validations');
 
@@ -39,13 +38,13 @@ aplication.post('/user', async (req, res) => {
   const checkValues = await valid.CheckValues(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser);
 
   if (checkValues.status) {
-    const user = await funct.InsertUser(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser, fileUserName);
     if (req.files && req.files.image) {
       const fileUser = req.files.image;
       var fileUserName = fileUser.name;
       const uploadPath = path.join(__dirname, 'imagesuser', fileUserName);
       await fileUser.mv(uploadPath);
     }
+    const user = await funct.InsertUser(nameUser, dayDateUser, monthDateUser, yearDateUser, emailUser, phoneUser, passwordUser, fileUserName);
     const newUser = await funct.SelectUserEmail(emailUser);
     res.status(user.cod).json(newUser).end();
   } else {
@@ -80,13 +79,11 @@ aplication.post('/userchangepassword-newcodice', async (req, res) => {
     const userId = user.message[0].iduser;
     await funct.DeleteCode(userCodeId);
     const newCode = await funct.InsertCode(userId, emailUser);
-    console.log(user, userCodeId, userId, newCode)
     res.status(newCode.cod).json(newCode).end;
   } else if (checkEnabledUser.cod == 400) {
     const user = await funct.SelectUserEmail(emailUser);
     const userId = user.message[0].iduser;
     const newCode = await funct.InsertCode(userId, emailUser)
-    console.log(user, userId, newCode)
     res.status(newCode.cod).json(newCode).end;
   } else {
     res.status(checkEnabledUser.cod).json({ status: false, message: checkEnabledUser.message });

@@ -1,7 +1,10 @@
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
-const USER = process.env.user;
-const PASS = process.env.pass;
+const dotenv = require('dotenv');
+dotenv.config();
+
+const USER = process.env.EM_USER;
+const PASS = process.env.EM_PASS;
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
