@@ -34,7 +34,7 @@ async function InsertUser(paramName, paramDay, paramMonth, paramYear, paramEmail
         <h2 style="text-align: left; ">Ciao ${paramName}!</h2>
         <p>
           Stai ricevendo un'e-mail perché il tuo account nella
-          <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3; ">Pagina di Accesso</a> è stato creato correttamente!
+          <a href="https://login-app-gold.vercel.app/" style="font-style: italic;  color: #9400D3; ">Pagina di Accesso</a> è stato creato correttamente!
           <h2 style="font-size: 25px; ">Grazie!</h2>
         </p>
       </div>
@@ -113,7 +113,7 @@ async function DeleteUser(paramIdUser, paramEmail, paramName) {
         <h2 style="text-align: left; ">Ciao ${paramName}!</h2>
         <p style="font-size: 22px;">
                 Stai ricevendo un'e-mail perché il tuo account nella <br>
-                <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stata esclusa correttamente!
+                <a href="https://login-app-gold.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stata esclusa correttamente!
                 <h2 style="font-size: 25px;">Arrivederci!</h2>
             </p>
       </div>
@@ -163,7 +163,7 @@ async function ChangePassword(paramNewPassword, paramUserCode, paramIdCode, para
         <h2 style="text-align: left; ">Ciao!</h2>
         <p>
           Stai ricevendo un'e-mail perché il tuo password sulla <br>
-            <a href="https://logint-page-react.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stato modificato correttamente! 
+            <a href="https://login-app-gold.vercel.app/" style="font-style: italic;  color: #9400D3;">Pagina di Accesso</a> è stato modificato correttamente! 
         </p>
       </div>
       

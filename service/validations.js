@@ -28,10 +28,10 @@ async function CheckUserLogin(paramEmail, paramPassword) {
         if (compareHshed) {
             return { status: true, message: 'Success', cod: 200, idUser: id };
         } else {
-            return { status: false, message: 'Incorrect password', cod: 400 };
+            return { status: false, message: 'Password errata', cod: 400 };
         }
     } else {
-        return { status: false, message: 'There is no user with this email', cod: 400 };
+        return { status: false, message: "Non c'è nessun utente con questa email", cod: 400 };
     }
 };
 
@@ -41,7 +41,7 @@ async function NewXOldPassword(paramNewPassword, paramEmail) {
     const oldUserPassword = result[0].password;
     const compareHash = await service.CompareHash(paramNewPassword, oldUserPassword);
     if (compareHash) {
-        return { status: false, message: 'Current password is the same as the previous one', cod: 400 }
+        return { status: false, message: 'La password attuale è la stessa della precedente', cod: 400 }
     } else {
         return { status: true, message: 'Success', cod: 200 };
     }
@@ -53,7 +53,7 @@ async function CheckName(paramName) {
     if (validName) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
-        return { status: false, message: 'Invalid name', cod: 400 };
+        return { status: false, message: 'Nome non valido', cod: 400 };
     }
 };
 
@@ -66,11 +66,11 @@ async function CheckDate(paramDay, paramMonth, paramYear) {
     if (validDay && validMonth && validYear) {
         return { status: true, message: 'Success', cod: 200 };
     } else if (!validDay) {
-        return { status: false, message: 'Invalid day', cod: 400 };
+        return { status: false, message: 'Giorno non valido', cod: 400 };
     } else if (!validMonth) {
-        return { status: false, message: 'Invalid month', cod: 400 };
+        return { status: false, message: 'Mese non valido', cod: 400 };
     } else if (!validYear) {
-        return { status: false, message: 'Invalid year', cod: 400 };
+        return { status: false, message: 'Anno non valido', cod: 400 };
     }
 };
 
@@ -79,7 +79,7 @@ async function ValidEmail(paramEmail) {
     const [rows] = await connectionBD.query('SELECT * FROM users WHERE email = ?', [paramEmail]);
     connectionBD.release();
     if (rows.length > 0) {
-        return { status: false, message: 'Email already registered', cod: 400 };
+        return { status: false, message: 'Email già registrata', cod: 400 };
     } else {
         return { status: true, message: 'Success', cod: 200 };
     }
@@ -96,7 +96,7 @@ async function CheckEmail(paramEmail) {
             return checkEmail;
         }
     } else {
-        return { status: false, message: 'Invalid email', cod: 400 };
+        return { status: false, message: 'Email non valida', cod: 400 };
     }
 };
 
@@ -106,20 +106,19 @@ async function CheckPhone(paramPhone) {
     if (validPhone) {
         return { status: true, message: 'Success', cod: 200 };
     } else {
-        return { status: false, message: 'Invalid phone', cod: 400 };
+        return { status: false, message: 'Telefono non valido', cod: 400 };
     }
 };
 
 async function CheckPassword(paramPassword) {
-    const passwordRules = [
-        { passwordRegex: /[A-Z]/, message: "Must contain at least one capital letter" },
-        { passwordRegex: /[a-z]/, message: "Must contain at least one lowercase letter" },
-        { passwordRegex: /\d/, message: "Must contain at least one number" },
-        { passwordRegex: /[@$!%*?&]/, message: "Must contain at least one special character (@$!%*?&)" },
-        { passwordRegex: /.{8,}/, message: "Must be at least 8 characters long" }
-    ];
-    const errors = passwordRules.filter(rules => !rules.passwordRegex.test(paramPassword)).map(rules => rules.message)
-    return errors.length > 0 ? { status: false, message: errors, cod: 400 } : { status: true, message: 'Success', cod: 200 };
+    const param = 6
+    const validPassword = paramPassword.length >= param;
+    if(validPassword) {
+        return { status: true, message: 'Success', cod: 200 };
+    }
+    else {
+        return { status: false, message: 'La password deve contenere almeno 6 caratteri', cod: 400 };
+    }
 };
 
 async function CheckValues(paramName, paramDay, paramMonth, paramYear, paramEmail, paramPhone, paramPassword) {
@@ -150,9 +149,9 @@ async function CheckUserCode(paramCU, paramE) {
     const check = await service.CompareHash(paramCU, hashUser);
     if (check) {
         const idCodeUser = user.message[0].idcode;
-        return { status: true, message: 'Success CheckUserCode', cod: 200, code: idCodeUser };
+        return { status: true, message: 'Success', cod: 200, code: idCodeUser };
     } else {
-        return { status: false, message: 'Invalid code', cod: 400 };
+        return { status: false, message: 'Codice non valido', cod: 400 };
     }
 };
 
@@ -162,12 +161,12 @@ async function CheckEmailCodeUser(paramEmail) {
         const result = await funct.SelectUserEmail(paramEmail);
         const userCode = result.message[0].code;
         if (userCode === null || userCode === '') {
-            return { status: false, message: 'There is no code for the email sent', cod: 400 };
+            return { status: false, message: "Non c'è alcun codice per l'email inviata", cod: 400 };
         } else {
             return { status: true, message: 'Success', cod: 200 };
         }
     } else {
-        return { status: false, message: 'Ivalid email', cod: 401 };
+        return { status: false, message: 'Email non valida', cod: 401 };
     }
 };
 
@@ -179,7 +178,7 @@ async function CheckVerified(paramEmail) {
         const idCode = result.message[0].idcode;
         return { status: true, message: 'Success', cod: 200, userCode: userCode, idCode: idCode };
     } else {
-        return { status: false, message: 'Email not enabled to change password', cod: 400 };
+        return { status: false, message: 'Email non abilitata per cambiare password', cod: 400 };
     }
 };
 

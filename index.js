@@ -63,10 +63,10 @@ aplication.post('/userchangepassword', async (req, res) => {
       const inserCode = await funct.InsertCode(idUser, emailUser);
       res.status(inserCode.cod).json(inserCode).end();
     } else {
-      res.status(400).json({ status: false, message: 'A code has already been sent' });
+      res.status(400).json({ status: false, message: 'Un codice è già stato inviato' });
     }
   } else {
-    res.status(400).json({ status: false, message: 'There is no user with this email' });
+    res.status(400).json({ status: false, message: "Non c'è nessun utente con questa email" });
   }
 });
 
